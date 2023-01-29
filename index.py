@@ -3,168 +3,211 @@ import requests
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
+from sklearn import linear_model
 
 app = Flask(__name__)
 
 
-@app.route("/teams/", methods=["POST"])
+@app.route("/predict/", methods=["POST"])
 def result():
 
     players = request.json
 
-    url = "http://localhost:3000/api/training"
+    url = "https://bet-dota2.fly.dev/api/training"
     data = requests.get(url).json()
-    training_core = data["core"]
-    training_supp4 = data["supp4"]
-    training_supp5 = data["supp5"]
-    training_all = data["all"]
+    training_data = data["all"]
 
-    X_core = []
-    X_supp4 = []
-    X_supp5 = []
-    X_all = []
+    # return jsonify(players)
 
-    for t in training_core:
-        X_core.append(t[:-1])
+    X = []
 
-    for t in training_supp4:
-        X_supp4.append(t[:-1])
+    for t in training_data:
+        X.append(t[:-1])
 
-    for t in training_supp5:
-        X_supp5.append(t[:-1])
-        
-    for t in training_all:
-        X_all.append(t[:-1])
-
-    y_core = [last for *_, last in training_core]
-    y_supp4 = [last for *_, last in training_supp4]
-    y_supp5 = [last for *_, last in training_supp5]
-    y_all = [last for *_, last in training_all]
-
-    percent_rad_p1 = len(players["rad"]["p1"]) / len(training_core)
-    percent_rad_p2 = len(players["rad"]["p2"]) / len(training_core)
-    percent_rad_p3 = len(players["rad"]["p3"]) / len(training_core)
-    percent_rad_p4 = len(players["rad"]["p4"]) / len(training_supp4)
-    percent_rad_p5 = len(players["rad"]["p5"]) / len(training_supp5)
-
-    percent_dir_p1 = len(players["dir"]["p1"]) / len(training_core)
-    percent_dir_p2 = len(players["dir"]["p2"]) / len(training_core)
-    percent_dir_p3 = len(players["dir"]["p3"]) / len(training_core)
-    percent_dir_p4 = len(players["dir"]["p4"]) / len(training_supp4)
-    percent_dir_p5 = len(players["dir"]["p5"]) / len(training_supp5)
+    y = [last for *_, last in training_data]
 
     # Rad P1
     X_train, X_test, y_train, y_test = train_test_split(
-        X_core, y_core, test_size=percent_rad_p1
+        X, y, test_size=len(players["rad"]["p1"]), random_state=0
     )
-    dtree = DecisionTreeClassifier(max_depth=3)
-    dtree = dtree.fit(X_train, y_train)
-    y_pred = dtree.predict(X_test)
-    rad_p1 = metrics.accuracy_score(y_test, y_pred)
+    dtree = DecisionTreeClassifier(max_depth=3).fit(X_train, y_train)
+    y_pred = dtree.predict(players["rad"]["p1"])
+    rad_dt_p1 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["rad"]["p1"])
+    rad_lr_p1 = logr.score(players["rad"]["p1"], y_test)
 
     # Rad P2
     X_train, X_test, y_train, y_test = train_test_split(
-        X_core, y_core, test_size=percent_rad_p2
+        X, y, test_size=len(players["rad"]["p2"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["rad"]["p2"])
-    rad_p2 = metrics.accuracy_score(y_test, y_pred)
+    rad_dt_p2 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["rad"]["p2"])
+    rad_lr_p2 = logr.score(players["rad"]["p2"], y_test)
 
     # Rad P3
     X_train, X_test, y_train, y_test = train_test_split(
-        X_core, y_core, test_size=percent_rad_p3
+        X, y, test_size=len(players["rad"]["p3"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["rad"]["p3"])
-    rad_p3 = metrics.accuracy_score(y_test, y_pred)
+    rad_dt_p3 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["rad"]["p3"])
+    rad_lr_p3 = logr.score(players["rad"]["p3"], y_test)
 
     # Rad P4
     X_train, X_test, y_train, y_test = train_test_split(
-        X_supp4, y_supp4, test_size=percent_rad_p4
+        X, y, test_size=len(players["rad"]["p4"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["rad"]["p4"])
-    rad_p4 = metrics.accuracy_score(y_test, y_pred)
+    rad_dt_p4 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["rad"]["p4"])
+    rad_lr_p4 = logr.score(players["rad"]["p4"], y_test)
 
     # Rad P5
     X_train, X_test, y_train, y_test = train_test_split(
-        X_supp5, y_supp5, test_size=percent_rad_p5
+        X, y, test_size=len(players["rad"]["p5"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["rad"]["p5"])
-    rad_p5 = metrics.accuracy_score(y_test, y_pred)
+    rad_dt_p5 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["rad"]["p5"])
+    rad_lr_p5 = logr.score(players["rad"]["p5"], y_test)
 
     # Dir P1
     X_train, X_test, y_train, y_test = train_test_split(
-        X_core, y_core, test_size=percent_dir_p1
+        X, y, test_size=len(players["dir"]["p1"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["dir"]["p1"])
-    dir_p1 = metrics.accuracy_score(y_test, y_pred)
+    dir_dt_p1 = metrics.accuracy_score(y_test, y_pred)
 
-    # Dir P2
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["dir"]["p1"])
+    dir_lr_p1 = logr.score(players["dir"]["p1"], y_test)
+
+    # # Dir P2
     X_train, X_test, y_train, y_test = train_test_split(
-        X_core, y_core, test_size=percent_dir_p2
+        X, y, test_size=len(players["dir"]["p2"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["dir"]["p2"])
-    dir_p2 = metrics.accuracy_score(y_test, y_pred)
+    dir_dt_p2 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["dir"]["p2"])
+    dir_lr_p2 = logr.score(players["dir"]["p2"], y_test)
 
     # Dir P3
     X_train, X_test, y_train, y_test = train_test_split(
-        X_core, y_core, test_size=percent_dir_p3
+        X, y, test_size=len(players["dir"]["p3"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["dir"]["p3"])
-    dir_p3 = metrics.accuracy_score(y_test, y_pred)
+    dir_dt_p3 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["dir"]["p3"])
+    dir_lr_p3 = logr.score(players["dir"]["p3"], y_test)
 
     # Dir P4
     X_train, X_test, y_train, y_test = train_test_split(
-        X_supp4, y_supp4, test_size=percent_dir_p4
+        X, y, test_size=len(players["dir"]["p4"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["dir"]["p4"])
-    dir_p4 = metrics.accuracy_score(y_test, y_pred)
+    dir_dt_p4 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["dir"]["p4"])
+    dir_lr_p4 = logr.score(players["dir"]["p4"], y_test)
 
     # Dir P5
     X_train, X_test, y_train, y_test = train_test_split(
-        X_supp5, y_supp5, test_size=percent_dir_p5
+        X, y, test_size=len(players["dir"]["p5"]), random_state=0
     )
     dtree = DecisionTreeClassifier(max_depth=3)
     dtree = dtree.fit(X_train, y_train)
     y_pred = dtree.predict(players["dir"]["p5"])
-    dir_p5 = metrics.accuracy_score(y_test, y_pred)
+    dir_dt_p5 = metrics.accuracy_score(y_test, y_pred)
+
+    logr = linear_model.LogisticRegression(solver="liblinear", random_state=0).fit(
+        X_train, y_train
+    )
+    y_pred = logr.predict(players["dir"]["p5"])
+    dir_lr_p5 = logr.score(players["dir"]["p5"], y_test)
 
     return jsonify(
         {
             "dt": {
-                "rad": {
-                    "p1": rad_p1,
-                    "p2": rad_p2,
-                    "p3": rad_p3,
-                    "p4": rad_p4,
-                    "p5": rad_p5,
-                },
-                "dir": {
-                    "p1": dir_p1,
-                    "p2": dir_p2,
-                    "p3": dir_p3,
-                    "p4": dir_p4,
-                    "p5": dir_p5,
-                },
+                "rad": [
+                    float("%.*f" % (2, rad_dt_p1)),
+                    float("%.*f" % (2, rad_dt_p2)),
+                    float("%.*f" % (2, rad_dt_p3)),
+                    float("%.*f" % (2, rad_dt_p4)),
+                    float("%.*f" % (2, rad_dt_p5)),
+                ],
+                "dir": [
+                    float("%.*f" % (2, dir_dt_p1)),
+                    float("%.*f" % (2, dir_dt_p2)),
+                    float("%.*f" % (2, dir_dt_p3)),
+                    float("%.*f" % (2, dir_dt_p4)),
+                    float("%.*f" % (2, dir_dt_p5)),
+                ],
             },
-            "rf": {
-                "rad": {
-                    "p1": ""
-                }
-            }
+            "lr": {
+                "rad": [
+                    float("%.*f" % (2, rad_lr_p1)),
+                    float("%.*f" % (2, rad_lr_p2)),
+                    float("%.*f" % (2, rad_lr_p3)),
+                    float("%.*f" % (2, rad_lr_p4)),
+                    float("%.*f" % (2, rad_lr_p5)),
+                ],
+                "dir": [
+                    float("%.*f" % (2, dir_lr_p1)),
+                    float("%.*f" % (2, dir_lr_p2)),
+                    float("%.*f" % (2, dir_lr_p3)),
+                    float("%.*f" % (2, dir_lr_p4)),
+                    float("%.*f" % (2, dir_lr_p5)),
+                ],
+            },
         }
     )
