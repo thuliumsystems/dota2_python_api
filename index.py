@@ -4,21 +4,21 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.preprocessing import StandardScaler
 
 app = Flask(__name__)
 
 
-def split_data(X, y, data):
+def split_data(X, y, player):
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=len(data), random_state=0, stratify=y
+        X, y, test_size=len(player), random_state=42, stratify=y
     )
     scaler = StandardScaler()
     scaler.fit(X_train)
     X_train = scaler.transform(X_train)
-    X_test = scaler.transform(data)
+    X_test = scaler.transform(player)
     return X_train, X_test, y_train, y_test
 
 
@@ -35,7 +35,7 @@ def train_lr_model(X_train, y_train):
 
 
 def train_rf_model(X_train, y_train):
-    model = RandomForestClassifier(max_features=18)
+    model = RandomForestClassifier(max_features=13)
     model.fit(X_train, y_train)
     return model
 
