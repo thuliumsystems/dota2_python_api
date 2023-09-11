@@ -1,316 +1,299 @@
 from flask import Flask, jsonify, request
-import requests
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    AdaBoostClassifier,
+    GradientBoostingClassifier,
+)
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+import pickle
 
 app = Flask(__name__)
 
 
-def split_data(X, y, player):
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=len(player), random_state=42, stratify=y
-    )
-    scaler = StandardScaler()
-    scaler.fit(X_train)
-    X_train = scaler.transform(X_train)
-    X_test = scaler.transform(player)
-    return X_train, X_test, y_train, y_test
+@app.route("/predict/", methods=["POST"])
+def result():
+    data = request.get_json()
+
+    all = result_all(data["teams_avg_all"])
+    as_kda = result_as_kda(data["teams_avg_as_kda"])
+    de_as_kda_gpm = result_de_as_kda_gpm(data["teams_avg_de_as_kda_gpm"])
+
+    return jsonify({"all": all, "as_kda": as_kda, "de_as_kda_gpm": de_as_kda_gpm})
+
+
+def result_all(teams_avg_all):
+    rad = 0
+    dir = 0
+
+    rf = pickle.load(open("saved/all/rf.sav", "rb"))
+    rf = rf.predict_proba([teams_avg_all])
+    rad += rf[0][1]
+    dir += rf[0][0]
+
+    dt = pickle.load(open("saved/all/dt.sav", "rb"))
+    dt = dt.predict_proba([teams_avg_all])
+    rad += dt[0][1]
+    dir += dt[0][0]
+
+    lr = pickle.load(open("saved/all/lr.sav", "rb"))
+    lr = lr.predict_proba([teams_avg_all])
+    rad += lr[0][1]
+    dir += lr[0][0]
+
+    gb = pickle.load(open("saved/all/gb.sav", "rb"))
+    gb = gb.predict_proba([teams_avg_all])
+    rad += gb[0][1]
+    dir += gb[0][0]
+
+    gnb = pickle.load(open("saved/all/gnb.sav", "rb"))
+    gnb = gnb.predict_proba([teams_avg_all])
+    rad += gnb[0][1]
+    dir += gnb[0][0]
+
+    knn = pickle.load(open("saved/all/knn.sav", "rb"))
+    knn = knn.predict_proba([teams_avg_all])
+    rad += knn[0][1]
+    dir += knn[0][0]
+
+    ada = pickle.load(open("saved/all/ada.sav", "rb"))
+    ada = ada.predict_proba([teams_avg_all])
+    rad += ada[0][1]
+    dir += ada[0][0]
+
+    mpl = pickle.load(open("saved/all/mpl.sav", "rb"))
+    mpl = mpl.predict_proba([teams_avg_all])
+    rad += mpl[0][1]
+    dir += mpl[0][0]
+
+    svc = pickle.load(open("saved/all/svc.sav", "rb"))
+    svc = svc.predict_proba([teams_avg_all])
+    rad += svc[0][1]
+    dir += svc[0][0]
+
+    qda = pickle.load(open("saved/all/qda.sav", "rb"))
+    qda = qda.predict_proba([teams_avg_all])
+    rad += qda[0][1]
+    dir += qda[0][0]
+
+    return [
+        round(rad / 10, 2),
+        round(dir / 10, 2),
+        [round(rf[0][1], 2), round(rf[0][0], 2)],
+        [round(dt[0][1], 2), round(dt[0][0], 2)],
+        [round(lr[0][1], 2), round(lr[0][0], 2)],
+        [round(gb[0][1], 2), round(gb[0][0], 2)],
+        [round(gnb[0][1], 2), round(gnb[0][0], 2)],
+        [round(knn[0][1], 2), round(knn[0][0], 2)],
+        [round(ada[0][1], 2), round(ada[0][0], 2)],
+        [round(mpl[0][1], 2), round(mpl[0][0], 2)],
+        [round(svc[0][1], 2), round(svc[0][0], 2)],
+        [round(qda[0][1], 2), round(qda[0][0], 2)],
+    ]
+
+
+def result_as_kda(teams_avg_as_kda):
+    rad = 0
+    dir = 0
+
+    rf = pickle.load(open("saved/as_kda/rf.sav", "rb"))
+    rf = rf.predict_proba([teams_avg_as_kda])
+    rad += rf[0][1]
+    dir += rf[0][0]
+
+    dt = pickle.load(open("saved/as_kda/dt.sav", "rb"))
+    dt = dt.predict_proba([teams_avg_as_kda])
+    rad += dt[0][1]
+    dir += dt[0][0]
+
+    lr = pickle.load(open("saved/as_kda/lr.sav", "rb"))
+    lr = lr.predict_proba([teams_avg_as_kda])
+    rad += lr[0][1]
+    dir += lr[0][0]
+
+    gb = pickle.load(open("saved/as_kda/gb.sav", "rb"))
+    gb = gb.predict_proba([teams_avg_as_kda])
+    rad += gb[0][1]
+    dir += gb[0][0]
+
+    gnb = pickle.load(open("saved/as_kda/gnb.sav", "rb"))
+    gnb = gnb.predict_proba([teams_avg_as_kda])
+    rad += gnb[0][1]
+    dir += gnb[0][0]
+
+    knn = pickle.load(open("saved/as_kda/knn.sav", "rb"))
+    knn = knn.predict_proba([teams_avg_as_kda])
+    rad += knn[0][1]
+    dir += knn[0][0]
+
+    ada = pickle.load(open("saved/as_kda/ada.sav", "rb"))
+    ada = ada.predict_proba([teams_avg_as_kda])
+    rad += ada[0][1]
+    dir += ada[0][0]
+
+    mpl = pickle.load(open("saved/as_kda/mpl.sav", "rb"))
+    mpl = mpl.predict_proba([teams_avg_as_kda])
+    rad += mpl[0][1]
+    dir += mpl[0][0]
+
+    svc = pickle.load(open("saved/as_kda/svc.sav", "rb"))
+    svc = svc.predict_proba([teams_avg_as_kda])
+    rad += svc[0][1]
+    dir += svc[0][0]
+
+    qda = pickle.load(open("saved/as_kda/qda.sav", "rb"))
+    qda = qda.predict_proba([teams_avg_as_kda])
+    rad += qda[0][1]
+    dir += qda[0][0]
+
+    return [
+        round(rad / 10, 2),
+        round(dir / 10, 2),
+        [round(rf[0][1], 2), round(rf[0][0], 2)],
+        [round(dt[0][1], 2), round(dt[0][0], 2)],
+        [round(lr[0][1], 2), round(lr[0][0], 2)],
+        [round(gb[0][1], 2), round(gb[0][0], 2)],
+        [round(gnb[0][1], 2), round(gnb[0][0], 2)],
+        [round(knn[0][1], 2), round(knn[0][0], 2)],
+        [round(ada[0][1], 2), round(ada[0][0], 2)],
+        [round(mpl[0][1], 2), round(mpl[0][0], 2)],
+        [round(svc[0][1], 2), round(svc[0][0], 2)],
+        [round(qda[0][1], 2), round(qda[0][0], 2)],
+    ]
+
+
+def result_de_as_kda_gpm(teams_avg_de_as_kda_gpm):
+    rad = 0
+    dir = 0
+
+    rf = pickle.load(open("saved/de_as_kda_gpm/rf.sav", "rb"))
+    rf = rf.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += rf[0][1]
+    dir += rf[0][0]
+
+    dt = pickle.load(open("saved/de_as_kda_gpm/dt.sav", "rb"))
+    dt = dt.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += dt[0][1]
+    dir += dt[0][0]
+
+    lr = pickle.load(open("saved/de_as_kda_gpm/lr.sav", "rb"))
+    lr = lr.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += lr[0][1]
+    dir += lr[0][0]
+
+    gb = pickle.load(open("saved/de_as_kda_gpm/gb.sav", "rb"))
+    gb = gb.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += gb[0][1]
+    dir += gb[0][0]
+
+    gnb = pickle.load(open("saved/de_as_kda_gpm/gnb.sav", "rb"))
+    gnb = gnb.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += gnb[0][1]
+    dir += gnb[0][0]
+
+    knn = pickle.load(open("saved/de_as_kda_gpm/knn.sav", "rb"))
+    knn = knn.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += knn[0][1]
+    dir += knn[0][0]
+
+    ada = pickle.load(open("saved/de_as_kda_gpm/ada.sav", "rb"))
+    ada = ada.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += ada[0][1]
+    dir += ada[0][0]
+
+    mpl = pickle.load(open("saved/de_as_kda_gpm/mpl.sav", "rb"))
+    mpl = mpl.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += mpl[0][1]
+    dir += mpl[0][0]
+
+    svc = pickle.load(open("saved/de_as_kda_gpm/svc.sav", "rb"))
+    svc = svc.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += svc[0][1]
+    dir += svc[0][0]
+
+    qda = pickle.load(open("saved/de_as_kda_gpm/qda.sav", "rb"))
+    qda = qda.predict_proba([teams_avg_de_as_kda_gpm])
+    rad += qda[0][1]
+    dir += qda[0][0]
+
+    return [
+        round(rad / 10, 2),
+        round(dir / 10, 2),
+        [round(rf[0][1], 2), round(rf[0][0], 2)],
+        [round(dt[0][1], 2), round(dt[0][0], 2)],
+        [round(lr[0][1], 2), round(lr[0][0], 2)],
+        [round(gb[0][1], 2), round(gb[0][0], 2)],
+        [round(gnb[0][1], 2), round(gnb[0][0], 2)],
+        [round(knn[0][1], 2), round(knn[0][0], 2)],
+        [round(ada[0][1], 2), round(ada[0][0], 2)],
+        [round(mpl[0][1], 2), round(mpl[0][0], 2)],
+        [round(svc[0][1], 2), round(svc[0][0], 2)],
+        [round(qda[0][1], 2), round(qda[0][0], 2)],
+    ]
+
+
+def train_rf_model(X_train, y_train):
+    model = RandomForestClassifier(max_depth=10, min_samples_split=2, n_estimators=200)
+    model.fit(X_train, y_train)
+    return model
 
 
 def train_dt_model(X_train, y_train):
-    model = DecisionTreeClassifier()
+    model = DecisionTreeClassifier(
+        max_depth=5, min_samples_leaf=4, min_samples_split=10
+    )
+    model.fit(X_train, y_train)
+    return model
+
+
+def train_ada_model(X_train, y_train):
+    model = AdaBoostClassifier(learning_rate=0.1, n_estimators=200)
     model.fit(X_train, y_train)
     return model
 
 
 def train_lr_model(X_train, y_train):
-    model = LogisticRegression(max_iter=1000)
-    model.fit(X_train, y_train)
-    return model
-
-
-def train_rf_model(X_train, y_train):
-    model = RandomForestClassifier(max_features=13)
+    model = LogisticRegression()
     model.fit(X_train, y_train)
     return model
 
 
 def train_gb_model(X_train, y_train):
-    model = GradientBoostingClassifier()
+    model = GradientBoostingClassifier(learning_rate=0.01, n_estimators=100)
     model.fit(X_train, y_train)
     return model
 
 
-@app.route("/predict/", methods=["POST"])
-def result():
+def train_gnb_model(X_train, y_train):
+    model = GaussianNB(var_smoothing=1e-09)
+    model.fit(X_train, y_train)
+    return model
 
-    players = request.json
 
-    # url = "http://localhost:3000/api/training"
-    url = "https://bet-dota2.fly.dev/api/training"
-    data = requests.get(url).json()
-    training_data = data["all"]
+def train_knn_model(X_train, y_train):
+    model = KNeighborsClassifier(n_neighbors=9)
+    model.fit(X_train, y_train)
+    return model
 
-    # return jsonify(players)
 
-    X = []
+def train_mpl_model(X_train, y_train):
+    model = MLPClassifier()
+    model.fit(X_train, y_train)
+    return model
 
-    for t in training_data:
-        X.append(t[:-1])
 
-    y = [last for *_, last in training_data]
+def train_svc_model(X_train, y_train):
+    model = SVC(C=1, gamma=0.001, kernel="rbf", probability=True)
+    model.fit(X_train, y_train)
+    return model
 
-    # Rad P1
-    X_train, X_test, y_train, y_test = split_data(X, y, players["rad"]["p1"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    rad_dt_p1 = accuracy_score(y_test, y_pred)
 
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    rad_lr_p1 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    rad_rf_p1 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    rad_gb_p1 = accuracy_score(y_test, y_pred)
-    # print(classification_report(y_test, gb.predict(X_test)))
-
-    # Rad P2
-    X_train, X_test, y_train, y_test = split_data(X, y, players["rad"]["p2"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    rad_dt_p2 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    rad_lr_p2 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    rad_rf_p2 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    rad_gb_p2 = accuracy_score(y_test, y_pred)
-    
-    # Rad P3
-    X_train, X_test, y_train, y_test = split_data(X, y, players["rad"]["p3"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    rad_dt_p3 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    rad_lr_p3 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    rad_rf_p3 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    rad_gb_p3 = accuracy_score(y_test, y_pred)
-    
-    # Rad P4
-    X_train, X_test, y_train, y_test = split_data(X, y, players["rad"]["p4"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    rad_dt_p4 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    rad_lr_p4 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    rad_rf_p4 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    rad_gb_p4 = accuracy_score(y_test, y_pred)
-    
-    # Rad P5
-    X_train, X_test, y_train, y_test = split_data(X, y, players["rad"]["p5"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    rad_dt_p5 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    rad_lr_p5 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    rad_rf_p5 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    rad_gb_p5 = accuracy_score(y_test, y_pred)
-    
-    # Dir P1
-    X_train, X_test, y_train, y_test = split_data(X, y, players["dir"]["p1"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    dir_dt_p1 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    dir_lr_p1 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    dir_rf_p1 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    dir_gb_p1 = accuracy_score(y_test, y_pred)
-
-    # Dir P2
-    X_train, X_test, y_train, y_test = split_data(X, y, players["dir"]["p2"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    dir_dt_p2 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    dir_lr_p2 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    dir_rf_p2 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    dir_gb_p2 = accuracy_score(y_test, y_pred)
-    
-    # Dir P3
-    X_train, X_test, y_train, y_test = split_data(X, y, players["dir"]["p3"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    dir_dt_p3 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    dir_lr_p3 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    dir_rf_p3 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    dir_gb_p3 = accuracy_score(y_test, y_pred)
-    
-    # Dir P4
-    X_train, X_test, y_train, y_test = split_data(X, y, players["dir"]["p4"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    dir_dt_p4 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    dir_lr_p4 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    dir_rf_p4 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    dir_gb_p4 = accuracy_score(y_test, y_pred)
-    
-    # Dir P5
-    X_train, X_test, y_train, y_test = split_data(X, y, players["dir"]["p5"])
-    dt = train_dt_model(X_train, y_train)
-    y_pred = dt.predict(X_test)
-    dir_dt_p5 = accuracy_score(y_test, y_pred)
-
-    lr = train_lr_model(X_train, y_train)
-    y_pred = lr.predict(X_test)
-    dir_lr_p5 = accuracy_score(y_test, y_pred)
-
-    rf = train_rf_model(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    dir_rf_p5 = accuracy_score(y_test, y_pred)
-
-    gb = train_gb_model(X_train, y_train)
-    y_pred = gb.predict(X_test)
-    dir_gb_p5 = accuracy_score(y_test, y_pred)
-
-    return jsonify(
-        {
-            "dt": {
-                "rad": [
-                    float("%.*f" % (2, rad_dt_p1)),
-                    float("%.*f" % (2, rad_dt_p2)),
-                    float("%.*f" % (2, rad_dt_p3)),
-                    float("%.*f" % (2, rad_dt_p4)),
-                    float("%.*f" % (2, rad_dt_p5)),
-                ],
-                "dir": [
-                    float("%.*f" % (2, dir_dt_p1)),
-                    float("%.*f" % (2, dir_dt_p2)),
-                    float("%.*f" % (2, dir_dt_p3)),
-                    float("%.*f" % (2, dir_dt_p4)),
-                    float("%.*f" % (2, dir_dt_p5)),
-                ],
-            },
-            "lr": {
-                "rad": [
-                    float("%.*f" % (2, rad_lr_p1)),
-                    float("%.*f" % (2, rad_lr_p2)),
-                    float("%.*f" % (2, rad_lr_p3)),
-                    float("%.*f" % (2, rad_lr_p4)),
-                    float("%.*f" % (2, rad_lr_p5)),
-                ],
-                "dir": [
-                    float("%.*f" % (2, dir_lr_p1)),
-                    float("%.*f" % (2, dir_lr_p2)),
-                    float("%.*f" % (2, dir_lr_p3)),
-                    float("%.*f" % (2, dir_lr_p4)),
-                    float("%.*f" % (2, dir_lr_p5)),
-                ],
-            },
-            "rf": {
-                "rad": [
-                    float("%.*f" % (2, rad_rf_p1)),
-                    float("%.*f" % (2, rad_rf_p2)),
-                    float("%.*f" % (2, rad_rf_p3)),
-                    float("%.*f" % (2, rad_rf_p4)),
-                    float("%.*f" % (2, rad_rf_p5)),
-                ],
-                "dir": [
-                    float("%.*f" % (2, dir_rf_p1)),
-                    float("%.*f" % (2, dir_rf_p2)),
-                    float("%.*f" % (2, dir_rf_p3)),
-                    float("%.*f" % (2, dir_rf_p4)),
-                    float("%.*f" % (2, dir_rf_p5)),
-                ],
-            },
-            "gb": {
-                "rad": [
-                    float("%.*f" % (2, rad_gb_p1)),
-                    float("%.*f" % (2, rad_gb_p2)),
-                    float("%.*f" % (2, rad_gb_p3)),
-                    float("%.*f" % (2, rad_gb_p4)),
-                    float("%.*f" % (2, rad_gb_p5)),
-                ],
-                "dir": [
-                    float("%.*f" % (2, dir_gb_p1)),
-                    float("%.*f" % (2, dir_gb_p2)),
-                    float("%.*f" % (2, dir_gb_p3)),
-                    float("%.*f" % (2, dir_gb_p4)),
-                    float("%.*f" % (2, dir_gb_p5)),
-                ],
-            },
-        }
-    )
+def train_qda_model(X_train, y_train):
+    model = QuadraticDiscriminantAnalysis(reg_param=0.1)
+    model.fit(X_train, y_train)
+    return model
